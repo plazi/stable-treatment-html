@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" xmlns:tax="http://www.taxonx.org/schema/v1" xmlns:dwc="http://digir.net/schema/conceptual/darwin/2003/1.0" xmlns:dwcranks="http://rs.tdwg.org/UBIF/2006/Schema/1.1" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<xsl:stylesheet
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	version="1.0"
+	xmlns:tax="http://www.taxonx.org/schema/v1"
+	xmlns:dwc="http://digir.net/schema/conceptual/darwin/2003/1.0"
+	xmlns:dwcranks="http://rs.tdwg.org/UBIF/2006/Schema/1.1"
+	xmlns:mods="http://www.loc.gov/mods/v3"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	exclude-result-prefixes="tax dwc dwcranks mods xsi"
+	>
 	<xsl:output method="xml" indent="yes" encoding="UTF-8"/>
 	<xsl:strip-space elements="*"/>
 	
@@ -29,9 +38,48 @@
 		</p>
 	</xsl:template>
 	
+	<xsl:template match="paragraph[./heading/@level]">
+		<xsl:apply-templates/>
+	</xsl:template>
+	
+	<xsl:template match="heading[./@level]">
+		<xsl:choose>
+			<xsl:when test="./@level = 1">
+				<h1>
+					<xsl:apply-templates/>
+				</h1>
+			</xsl:when>
+			<xsl:when test="./@level = 2">
+				<h2>
+					<xsl:apply-templates/>
+				</h2>
+			</xsl:when>
+			<xsl:when test="./@level = 3">
+				<h3>
+					<xsl:apply-templates/>
+				</h3>
+			</xsl:when>
+			<xsl:when test="./@level = 4">
+				<h4>
+					<xsl:apply-templates/>
+				</h4>
+			</xsl:when>
+			<xsl:when test="./@level = 5">
+				<h5>
+					<xsl:apply-templates/>
+				</h5>
+			</xsl:when>
+			<xsl:when test="./@level = 6">
+				<h6>
+					<xsl:apply-templates/>
+				</h6>
+			</xsl:when>
+		</xsl:choose>
+	</xsl:template>
+	
 	<xsl:template match="emphasis[./@bold and ./@italics]">
 		<xsl:choose>
-			<xsl:when test="./ancestor::emphasis[./@bold]">
+			<xsl:when test="./ancestor::emphasis[./@bold] or ./ancestor::heading[./@level]">
 				<i>
 					<xsl:apply-templates/>
 				</i>
@@ -50,9 +98,16 @@
 	</xsl:template>
 	
 	<xsl:template match="emphasis[./@bold]">
-		<b>
-			<xsl:apply-templates/>
-		</b>
+		<xsl:choose>
+			<xsl:when test="./ancestor::heading[./@level]">
+				<xsl:apply-templates/>
+			</xsl:when>
+			<xsl:otherwise>
+				<b>
+					<xsl:apply-templates/>
+				</b>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 	
 	<xsl:template match="emphasis[./@italics]">
@@ -84,10 +139,15 @@
 		</tr>
 	</xsl:template>
 	<xsl:template match="td">
-		<td>
-			<!-- TODO colspan, rowspan -->
+		<xsl:element name="td">
+			<xsl:if test="./@colspan">
+				<xsl:attribute name="colspan"><xsl:value-of select="./@colspan"/></xsl:attribute>
+			</xsl:if>
+			<xsl:if test="./@rowspan">
+				<xsl:attribute name="rowspan"><xsl:value-of select="./@rowspan"/></xsl:attribute>
+			</xsl:if>
 			<xsl:apply-templates/>
-		</td>
+		</xsl:element>
 	</xsl:template>
 	
 	<xsl:template match="normalizedToken">
