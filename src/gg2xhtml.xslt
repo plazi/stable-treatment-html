@@ -32,6 +32,8 @@
 		<xsl:apply-templates select=".//paragraph"/>
 	</xsl:template>
 	
+	<xsl:template match="paragraph[./ancestor::caption or ./descendant::caption]"/>
+	
 	<xsl:template match="paragraph">
 		<p> <!-- TODO font size -->
 			<xsl:apply-templates/>
@@ -146,7 +148,24 @@
 			<xsl:if test="./@rowspan">
 				<xsl:attribute name="rowspan"><xsl:value-of select="./@rowspan"/></xsl:attribute>
 			</xsl:if>
-			<xsl:apply-templates/>
+			<xsl:choose>
+				<xsl:when test="./@isEmpty"/>
+				<xsl:otherwise><xsl:apply-templates/></xsl:otherwise>
+			</xsl:choose>
+		</xsl:element>
+	</xsl:template>
+	<xsl:template match="th">
+		<xsl:element name="th">
+			<xsl:if test="./@colspan">
+				<xsl:attribute name="colspan"><xsl:value-of select="./@colspan"/></xsl:attribute>
+			</xsl:if>
+			<xsl:if test="./@rowspan">
+				<xsl:attribute name="rowspan"><xsl:value-of select="./@rowspan"/></xsl:attribute>
+			</xsl:if>
+			<xsl:choose>
+				<xsl:when test="./@isEmpty"/>
+				<xsl:otherwise><xsl:apply-templates/></xsl:otherwise>
+			</xsl:choose>
 		</xsl:element>
 	</xsl:template>
 	
